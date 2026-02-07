@@ -1,0 +1,24 @@
+name: portfolio
+
+services:
+  api:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8080:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: bash -lc "rm -f tmp/pids/server.pid && bundle exec rails s -b 0.0.0.0 -p 3000"
+
+  db:
+    image: mysql:9.6
+    env_file:
+      - .env
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
