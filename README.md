@@ -1,24 +1,91 @@
-# README
+# Portfolio API
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails + Docker + MySQL を用いた API ポートフォリオです。  
+ローカル環境差異をなくすため、Docker Compose で開発環境を構築しています。
 
-Things you may want to cover:
+---
 
-* Ruby version
+## 技術スタック
 
-* System dependencies
+- Ruby 4.0
+- Rails 8.1.2（API モード）
+- MySQL
+- Docker / Docker Compose
+- RuboCop（rubocop-rails-omakase）
 
-* Configuration
+---
 
-* Database creation
+## 環境構築
 
-* Database initialization
+### 前提
 
-* How to run the test suite
+- Docker Desktop
+- Docker Compose
+- （Windows の場合）WSL2
 
-* Services (job queues, cache servers, search engines, etc.)
+### セットアップ手順
 
-* Deployment instructions
+```bash
+git clone git@github.com:sukotazushi/portfolio-api.git
+cd portfolio-api
+cp .env.example .env
+docker compose up -d --build
+```
 
-* ...
+---
+
+## データベース作成
+
+```bash
+docker compose exec api bundle exec rails db:create
+docker compose exec api bundle exec rails db:migrate
+```
+
+---
+
+## 起動確認
+
+Rails サーバは以下で起動します。
+
+```bash
+docker compose up -d
+```
+
+ブラウザまたは curl で確認：
+
+```bash
+curl http://localhost:8080/health
+```
+
+レスポンス例：
+
+```json
+{ "status": "ok" }
+```
+
+---
+
+## 環境変数
+
+`.env` ファイルで以下を設定します。
+
+```env
+DATABASE_HOST=db
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=your_password
+DATABASE_BASE_NAME=portfolio_api
+
+MYSQL_ROOT_PASSWORD=your_password
+```
+
+※ `.env.example` を参考にしてください。
+
+---
+
+## コード品質
+
+静的解析に RuboCop（rubocop-rails-omakase）を使用しています。
+
+```bash
+docker compose run --rm api bundle exec rubocop
+```
