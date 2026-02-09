@@ -8,12 +8,8 @@ default: &default
 
 development:
   <<: *default
-  database: <%= "#{ENV.fetch("DATABASE_BASE_NAME")}_#{Rails.env}" %>
+  database: portfolio_api_development
 
 test:
   <<: *default
-  database: <%= "#{ENV.fetch("DATABASE_BASE_NAME")}_#{Rails.env}" %>
-
-production:
-  <<: *default
-  database: <%= "#{ENV.fetch("DATABASE_BASE_NAME")}_#{Rails.env}" %>
+  database: portfolio_api_test
