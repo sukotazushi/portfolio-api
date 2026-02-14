@@ -89,3 +89,9 @@ MYSQL_ROOT_PASSWORD=your_password
 ```bash
 docker compose run --rm api bundle exec rubocop
 ```
+
+---
+
+## ドキュメント
+
+- [認証機能の実装ガイド](docs/AUTHENTICATION_IMPLEMENTATION.md) - Rails APIモードでの認証機能実装の流れ
