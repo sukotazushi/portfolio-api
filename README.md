@@ -89,3 +89,24 @@ MYSQL_ROOT_PASSWORD=your_password
 ```bash
 docker compose run --rm api bundle exec rubocop
 ```
+
+---
+
+## ドキュメント
+
+### 認証機能の実装
+
+- [認証機能の実装ガイド](docs/AUTHENTICATION_IMPLEMENTATION.md) - Rails APIモードでの認証機能実装の流れ
+- [GitHubイシューの作成手順](docs/GITHUB_ISSUE_INSTRUCTIONS.md) - 認証機能実装のイシュー作成方法（5つの方法）
+- [GitHub API機能の制限事項](docs/GITHUB_API_LIMITATIONS.md) - AIエージェントの機能と制限についての説明
+
+### 自動化ツール
+
+イシュー作成を自動化するツールが用意されています：
+
+```bash
+# シェルスクリプトを使用（GitHub CLI必要）
+./scripts/create-authentication-issue.sh
+```
+
+または、GitHubのActionsタブから「Create Issue from Template」ワークフローを実行してください。
