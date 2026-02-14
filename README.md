@@ -95,3 +95,4 @@ docker compose run --rm api bundle exec rubocop
 ## ドキュメント
 
 - [認証機能の実装ガイド](docs/AUTHENTICATION_IMPLEMENTATION.md) - Rails APIモードでの認証機能実装の流れ
+- [GitHubイシューの作成手順](docs/GITHUB_ISSUE_INSTRUCTIONS.md) - 認証機能実装のイシュー作成方法と準備事項
