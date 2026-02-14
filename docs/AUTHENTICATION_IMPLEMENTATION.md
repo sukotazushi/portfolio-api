@@ -241,9 +241,9 @@ module Authentication
   end
   
   def resume_session
-    if session = Session.active.find_by(token: token_from_header)
-      Current.session = session
-    end
+    token = token_from_header
+    session = Session.active.find_by(token: token) if token
+    Current.session = session if session
   end
   
   def request_authentication
@@ -265,23 +265,29 @@ class SessionsController < ApplicationController
   
   # POST /sessions
   def create
+    # タイミング攻撃を防ぐため、常に同じ処理時間を確保
     user = User.find_by(email: params[:email])
     
     if user&.authenticate(params[:password])
-      session = user.sessions.create!(
+      session = user.sessions.create(
         ip_address: request.remote_ip,
         user_agent: request.user_agent
       )
       
-      render json: {
-        token: session.token,
-        expires_at: session.expires_at,
-        user: {
-          id: user.id,
-          email: user.email
-        }
-      }, status: :created
+      if session.persisted?
+        render json: {
+          token: session.token,
+          expires_at: session.expires_at,
+          user: {
+            id: user.id,
+            email: user.email
+          }
+        }, status: :created
+      else
+        render json: { error: 'Failed to create session', details: session.errors.full_messages }, status: :unprocessable_entity
+      end
     else
+      # ユーザーの存在を推測されないよう、常に同じエラーメッセージ
       render json: { error: 'Invalid email or password' }, status: :unauthorized
     end
   end
@@ -377,7 +383,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     post sessions_url, params: { email: 'test@example.com', password: 'password123' }, as: :json
     
     assert_response :created
-    assert_not_nil JSON.parse(response.body)['token']
+    
+    json = JSON.parse(response.body)
+    assert_not_nil json['token']
+    assert_not_nil json['expires_at']
+    assert_equal user.id, json['user']['id']
+    assert_equal user.email, json['user']['email']
   end
   
   test "should not create session with invalid credentials" do
@@ -422,7 +433,30 @@ Rails Security Guideを参照し、以下のセキュリティ対策を実施し
 - ✅ トークンの有効期限設定
 - ✅ トークンの一意性保証
 
-### 3. レート制限
+### 3. タイミング攻撃対策
+
+認証処理では、ユーザーの存在を推測されないよう、常に同じ処理時間を確保します：
+
+- ✅ ユーザーが存在しない場合でも、パスワード検証と同等の処理時間を確保
+- ✅ エラーメッセージは常に同じ（「Invalid email or password」）
+- ✅ レスポンス時間が一定になるよう実装
+
+```ruby
+# タイミング攻撃を防ぐ実装例
+def create
+  user = User.find_by(email: params[:email])
+  
+  # 常にauthenticateを呼び出すことで処理時間を均一化
+  if user&.authenticate(params[:password])
+    # 認証成功時の処理
+  else
+    # 認証失敗時も同じエラーメッセージ
+    render json: { error: 'Invalid email or password' }, status: :unauthorized
+  end
+end
+```
+
+### 4. レート制限
 
 ブルートフォース攻撃を防ぐため、ログイン試行回数を制限します：
 
@@ -443,7 +477,7 @@ class Rack::Attack
 end
 ```
 
-### 4. HTTPS通信
+### 5. HTTPS通信
 
 本番環境では必ずHTTPS通信を使用します：
 
@@ -452,7 +486,7 @@ end
 config.force_ssl = true
 ```
 
-### 5. CORS設定
+### 6. CORS設定
 
 必要な場合のみCORSを有効化し、許可するオリジンを制限します：
 
@@ -470,12 +504,12 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 end
 ```
 
-### 6. SQLインジェクション対策
+### 7. SQLインジェクション対策
 
 - ✅ プレースホルダーを使用（`User.find_by(email: params[:email])`）
 - ❌ 文字列連結を避ける（`User.where("email = '#{params[:email]}'")`）
 
-### 7. マスアサインメント対策
+### 8. マスアサインメント対策
 
 Strong Parametersを使用：
 
@@ -485,15 +519,15 @@ def user_params
 end
 ```
 
-### 8. セッション固定攻撃対策
+### 9. セッション固定攻撃対策
 
 ログイン成功時にセッションIDを再生成します（トークンベース認証では新しいトークンを生成）。
 
-### 9. クロスサイトスクリプティング（XSS）対策
+### 10. クロスサイトスクリプティング（XSS）対策
 
 APIモードではHTMLを返さないため、XSSのリスクは低いですが、JSONレスポンスのエスケープは自動で行われます。
 
-### 10. ログ出力の注意
+### 11. ログ出力の注意
 
 パスワードやトークンをログに出力しないようにします：
 
