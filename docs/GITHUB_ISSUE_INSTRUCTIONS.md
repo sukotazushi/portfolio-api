@@ -28,7 +28,55 @@
 
 ---
 
-## 方法2: GitHub CLIを使用
+## 方法2: 自動化スクリプトを使用（簡単）
+
+提供されているシェルスクリプトを実行するだけでイシューを作成できます：
+
+```bash
+# スクリプトを実行可能にする（初回のみ）
+chmod +x scripts/create-authentication-issue.sh
+
+# イシューを作成
+./scripts/create-authentication-issue.sh
+```
+
+**前提条件：**
+- GitHub CLI (gh) がインストールされていること
+- `gh auth login` でログイン済みであること
+
+**利点：**
+- コマンド1つで作成完了
+- 確認プロンプト付きで安全
+- エラーハンドリング付き
+
+---
+
+## 方法3: GitHub Actionsを使用（ボタンクリックで自動化）
+
+GitHubのWeb UIから、ボタンをクリックするだけでイシューを作成できます：
+
+1. **Actionsタブに移動**
+   - https://github.com/sukotazushi/portfolio-api/actions
+
+2. **ワークフローを選択**
+   - 左サイドバーから「Create Issue from Template」を選択
+
+3. **ワークフローを実行**
+   - 「Run workflow」ボタンをクリック
+   - テンプレートを選択（デフォルト: authentication-implementation）
+   - 「Run workflow」を実行
+
+4. **結果を確認**
+   - ワークフロー実行完了後、作成されたイシューのリンクが表示されます
+
+**利点：**
+- 最も簡単（ボタンクリックのみ）
+- GitHub上で完結
+- ローカル環境不要
+
+---
+
+## 方法4: GitHub CLIを使用
 
 GitHub CLIがインストールされている場合、以下のコマンドで作成できます：
 
@@ -41,7 +89,7 @@ gh issue create \
 
 ---
 
-## 方法3: 手動でイシューを作成
+## 方法5: 手動でイシューを作成
 
 テンプレートを使用せず、手動で作成する場合：
 
